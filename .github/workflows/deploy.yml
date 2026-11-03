@@ -24,7 +24,7 @@ jobs:
       with:
         dotnet-version: '10.0.x' 
 
-    # 3. Compilar la solución (usando .slnx)
+    # 3. Compilar la solución (usando el archivo .slnx)
     - name: Build Solution
       run: dotnet build "Northwind.slnx" -c Release
 
@@ -36,8 +36,8 @@ jobs:
     - name: Publish BlazorClient
       run: dotnet publish "NorthWind.Sales.BlazorClient/NorthWind.Sales.BlazorClient.csproj" -c Release -o ./PublishBlazor
 
-    # 6. Copiar archivos de WebApi al servidor
-    - name: Copy WebApi files
+    # 6. Copiar WebApi a carpeta temporal en el servidor
+    - name: Copy WebApi files to temp
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -45,10 +45,10 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         source: "./PublishNorthWind/*"
-        target: "/var/www/northwind" 
+        target: "/tmp/deploy_webapi" 
 
-    # 7. Copiar archivos de Blazor (solo la carpeta wwwroot)
-    - name: Copy Blazor files
+    # 7. Copiar Blazor a carpeta temporal en el servidor
+    - name: Copy Blazor files to temp
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -56,9 +56,9 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         source: "./PublishBlazor/wwwroot/*"
-        target: "/var/www/blazor/wwwroot"
+        target: "/tmp/deploy_blazor"
 
-    # 8. Ejecutar comandos finales en el servidor
+    # 8. Mover archivos a su destino final, asignar permisos y reiniciar
     - name: Execute Server Commands
       uses: appleboy/ssh-action@master
       with:
@@ -67,8 +67,22 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         script: |
+          # --- PROCESO PARA WEBAPI ---
+          sudo mkdir -p /var/www/northwind
+          sudo cp -r /tmp/deploy_webapi/* /var/www/northwind/
           sudo chown -R natasha:natasha /var/www/NorthWind/wwwroot
+          
+          # --- PROCESO PARA BLAZOR ---
+          sudo mkdir -p /var/www/blazor/wwwroot
+          sudo cp -r /tmp/deploy_blazor/* /var/www/blazor/wwwroot/
           sudo chown -R www-data:www-data /var/www/blazor/wwwroot
+          
+          # --- LIMPIEZA ---
+          rm -rf /tmp/deploy_webapi
+          rm -rf /tmp/deploy_blazor
+          
+          # --- REINICIO DE SERVICIOS ---
           sudo systemctl restart northwind.service
           sudo systemctl reload nginx
-          echo "¡Despliegue completado con éxito!"
+          
+          echo "¡Despliegue completado con éxito y sin errores de permisos!"
