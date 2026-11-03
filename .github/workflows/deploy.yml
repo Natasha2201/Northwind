@@ -2,8 +2,8 @@ name: Deploy Northwind & Blazor to Debian
 
 on:
   push:
-    branches: [ "main" ] # O "master", revisa el nombre de tu rama principal
-    
+    branches: [ "main" ]
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -20,7 +20,6 @@ jobs:
 
     # 2. Compilar y Publicar el proyecto WebApi (Backend)
     - name: Publish WebApi
-      # ⚠️ Asegúrate de que la ruta coincida exactamente con tu explorador de soluciones
       run: dotnet publish "./UI/NorthWind.Sales.WebApi/NorthWind.Sales.WebApi.csproj" -c Release -o ./PublishNorthWind
 
     # 3. Compilar y Publicar el proyecto BlazorClient (Frontend)
@@ -36,7 +35,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         source: "./PublishNorthWind/*"
-        target: "/var/www/northwind" # Revisa si en tu servidor es con 'W' mayúscula
+        target: "/var/www/northwind" 
 
     # 5. Copiar archivos de Blazor (solo la carpeta wwwroot) al servidor
     - name: Copy Blazor files
@@ -58,7 +57,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          # Permisos para WebApi
+          # Permisos para WebApi (revisa si en tu servidor es con 'W' mayúscula: /var/www/NorthWind)
           sudo chown -R natasha:natasha /var/www/NorthWind/wwwroot
           
           # Permisos para Blazor
