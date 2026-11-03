@@ -85,4 +85,4 @@ jobs:
           sudo systemctl restart northwind.service
           sudo systemctl reload nginx
           
-          echo "¡Despliegue completado con éxito y sin errores de permisos!"
+          echo "¡Despliegue completado con éxito y sin errores de permisos!" 
