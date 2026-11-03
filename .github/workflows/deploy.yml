@@ -18,13 +18,13 @@ jobs:
       with:
         dotnet-version: '10.0.x' 
 
-    # 2. Compilar y Publicar el proyecto WebApi (Backend)
+    # 2. Compilar WebApi (Buscando el .csproj en cualquier carpeta)
     - name: Publish WebApi
-      run: dotnet publish "./UI/NorthWind.Sales.WebApi/NorthWind.Sales.WebApi.csproj" -c Release -o ./PublishNorthWind
+      run: dotnet publish "**/NorthWind.Sales.WebApi.csproj" -c Release -o ./PublishNorthWind
 
-    # 3. Compilar y Publicar el proyecto BlazorClient (Frontend)
+    # 3. Compilar Blazor (Buscando el .csproj en cualquier carpeta)
     - name: Publish BlazorClient
-      run: dotnet publish "./UI/NorthWind.Sales.BlazorClient/NorthWind.Sales.BlazorClient.csproj" -c Release -o ./PublishBlazor
+      run: dotnet publish "**/NorthWind.Sales.BlazorClient.csproj" -c Release -o ./PublishBlazor
 
     # 4. Copiar archivos de WebApi al servidor
     - name: Copy WebApi files
@@ -48,7 +48,7 @@ jobs:
         source: "./PublishBlazor/wwwroot/*"
         target: "/var/www/blazor/wwwroot"
 
-    # 6. Ejecutar comandos en el servidor (Permisos y Reinicio)
+    # 6. Ejecutar comandos en el servidor
     - name: Execute Server Commands
       uses: appleboy/ssh-action@master
       with:
@@ -57,14 +57,14 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          # Permisos para WebApi (revisa si en tu servidor es con 'W' mayúscula: /var/www/NorthWind)
+          # Permisos para WebApi (Ojo con la 'W' mayúscula de NorthWind en tu Debian)
           sudo chown -R natasha:natasha /var/www/NorthWind/wwwroot
           
           # Permisos para Blazor
           sudo chown -R www-data:www-data /var/www/blazor/wwwroot
           
-          # Reiniciar el servicio de .NET y recargar Nginx
+          # Reiniciar servicios
           sudo systemctl restart northwind.service
           sudo systemctl reload nginx
           
-          echo "¡Despliegue de WebApi y Blazor completado!"
+          echo "¡Despliegue completado!"
