@@ -1,0 +1,203 @@
+@implements IDisposable
+@using Microsoft.AspNetCore.Components.Forms
+@using NorthWind.Sales.Frontend.BusinessObjects.Interfaces
+@using NorthWind.Sales.Frontend.BusinessObjects.ValueObjects
+@using NorthWind.Sales.Frontend.BusinessObjects.Helpers
+@inject IProductGateway ProductGateway
+
+<div class="modal fade show" style="display:block; background-color:rgba(15,23,42,0.6);" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold" style="color: #0f172a;">Buscar Producto</h5>
+                <button type="button" class="btn-close" @onclick="OnClose"></button>
+            </div>
+            <div class="modal-body px-4 pb-4">
+                <div class="input-group mb-3">
+                    <select class="form-select" style="max-width: 150px;" value="@SearchCriteria" @onchange="OnCriteriaChanged">
+                        <option value="Todos">Todos</option>
+                        <option value="Id">ID</option>
+                        <option value="Nombre">Nombre</option>
+                    </select>
+
+                    <input type="text" class="form-control"
+                           placeholder="@GetPlaceholder()"
+                           value="@SearchTerm"
+                           @oninput="OnInput"
+                           @onkeypress="OnKeyPress" />
+
+                    <button class="btn btn-success" @onclick="ExecuteSearchImmediate">Buscar</button>
+                </div>
+
+                @if (IsLoading)
+                {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-success spinner-border-sm" role="status"></div>
+                        <span class="text-muted ms-2">Buscando...</span>
+                    </div>
+                }
+                else if (Results.Items.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                    <th class="text-muted small fw-semibold">ID</th>
+                                    <th class="text-muted small fw-semibold">Producto</th>
+                                    <th class="text-muted small fw-semibold">Precio</th>
+                                    <th class="text-muted small fw-semibold">Stock</th>
+                                    <th class="text-end text-muted small fw-semibold"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in Results.Items)
+                                {
+                                    <tr>
+                                        <td>@product.Id</td>
+                                        <td class="fw-semibold">@product.Name</td>
+                                        <td>@product.UnitPrice.ToString("C")</td>
+                                        <td>
+                                            <span class="fw-bold text-dark">@product.UnitsInStock</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <button type="button" class="btn btn-sm btn-success rounded-pill px-3"
+                                                    @onclick="() => SelectProduct(product)"
+                                                    disabled="@(product.UnitsInStock <= 0 || IsProductInOrder(product.Id))">
+                                                @(IsProductInOrder(product.Id) ? "Agregado" : "Agregar")
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pt-2">
+                        <Pagination Page="Results.Page"
+                                    TotalPages="Results.TotalPages"
+                                    OnPageChanged="LoadPage" />
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <p class="mb-0">No se encontraron productos.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<ProductSearchDto> OnProductSelected { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public IReadOnlyCollection<int> ProductIdsInOrder { get; set; } = [];
+
+    private string SearchCriteria = "Todos";
+    private string SearchTerm = "";
+    private PagedResult<ProductSearchDto> Results = new([], 0, 1, 10);
+    private bool IsLoading = false;
+    private int _searchVersion;
+    private CancellationTokenSource? _debounceCts;
+
+    private string GetPlaceholder() => SearchCriteria switch
+    {
+        "Id" => "Buscar por ID...",
+        "Nombre" => "Buscar por nombre...",
+        _ => "Buscar..."
+    };
+
+    private string GetInputFilter() => SearchCriteria switch
+    {
+        "Id" => "digits",
+        "Nombre" => "letters",
+        _ => "alphanumeric"
+    };
+
+    private int GetMaxLength() => SearchCriteria == "Id" ? 10 : 25;
+
+    private void CancelDebounce()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _debounceCts = null;
+    }
+
+    private async Task OnCriteriaChanged(ChangeEventArgs e)
+    {
+        SearchCriteria = e.Value?.ToString() ?? "Todos";
+        SearchTerm = string.Empty;
+        CancelDebounce();
+        await Search();
+    }
+
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value?.ToString() ?? string.Empty;
+        CancelDebounce();
+        var debounce = _debounceCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, debounce.Token);
+            if (!debounce.IsCancellationRequested)
+                await Search();
+        }
+        catch (TaskCanceledException)
+        {
+            // A newer input or criterion change superseded this search.
+        }
+    }
+
+    private async Task OnKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await ExecuteSearchImmediate();
+    }
+
+    private async Task ExecuteSearchImmediate()
+    {
+        CancelDebounce();
+        await Search();
+    }
+
+    private bool IsProductInOrder(int productId) => ProductIdsInOrder.Contains(productId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Search();
+    }
+
+    private async Task Search()
+    {
+        var version = ++_searchVersion;
+        IsLoading = true;
+        StateHasChanged();
+        var results = await ProductGateway.SearchAsync(SearchTerm, 1, 10, SearchCriteria);
+        if (version != _searchVersion) return;
+        Results = results;
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadPage(int page)
+    {
+        var version = ++_searchVersion;
+        IsLoading = true;
+        StateHasChanged();
+        var results = await ProductGateway.SearchAsync(SearchTerm, page, 10, SearchCriteria);
+        if (version != _searchVersion) return;
+        Results = results;
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task SelectProduct(ProductSearchDto product)
+    {
+        await OnProductSelected.InvokeAsync(product);
+        await OnClose.InvokeAsync();
+    }
+
+    public void Dispose() => CancelDebounce();
+}

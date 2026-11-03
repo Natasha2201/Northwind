@@ -1,0 +1,11 @@
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Linq.Expressions;
+global using System.Threading.Tasks;
+global using NorthWind.Validation.Entities.Enums;
+global using NorthWind.Validation.Entities.ValueObjects;
+global using NorthWind.Validation.Entities.Interfaces;
+global using NorthWind.Validation.Entities.Abstractions;
+global using Microsoft.Extensions.DependencyInjection.Extensions;
+global using NorthWind.Validation.Entities.Services;

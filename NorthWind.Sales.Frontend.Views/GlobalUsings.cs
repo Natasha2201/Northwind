@@ -1,0 +1,13 @@
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Threading.Tasks;
+global using Microsoft.AspNetCore.Components;
+global using Microsoft.AspNetCore.Components.Web;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.Extensions.DependencyInjection;
+global using NorthWind.Sales.Frontend.BusinessObjects.Interfaces;
+global using NorthWind.Sales.Entities.Dtos.CreateOrder;
+global using NorthWind.Sales.Frontend.Views.ViewModels.CreateOrder;
+global using NorthWind.Sales.Frontend.Views.Resources;
+global using NorthWind.Validation.Entities.Interfaces;

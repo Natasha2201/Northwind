@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NorthWind.Sales.Backend.BusinessObjects\NorthWind.Sales.Backend.BusinessObjects.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="QuestPDF" Version="2026.9.1" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NorthWind.Transactions.Entities\NorthWind.Transactions.Entities.csproj" />
+    <ProjectReference Include="..\NorthWind.Sales.Backend.Repositories\NorthWind.Sales.Backend.Repositories.csproj" />
+    <ProjectReference Include="..\NorthWind.Sales.Backend.BusinessObjects\NorthWind.Sales.Backend.BusinessObjects.csproj" />
+    <ProjectReference Include="..\NorthWind.Exceptions.Entities\NorthWind.Exceptions.Entities.csproj" />
+    <ProjectReference Include="..\NorthWind.DomainLogs.Entities\NorthWind.DomainLogs.Entities.csproj" />
+  </ItemGroup>
+
+</Project>

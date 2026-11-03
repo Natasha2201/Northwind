@@ -1,0 +1,50 @@
+@inherits NavMenuLayout
+@using NorthWind.Sales.Frontend.Views.Resources
+@using NorthWind.RazorComponents.Layouts
+@using NorthWind.RazorComponents.NavBars
+@using NorthWind.Membership.Frontend.RazorViews.Components
+
+<SectionContent SectionId="NavBarBrandSection">
+    <a class="navbar-brand d-flex align-items-center gap-2 text-white text-decoration-none fw-bold" href="">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-box-seam text-info" viewBox="0 0 16 16">
+            <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
+        </svg>
+        <span>@CommonMessages.NavBarBrandTitle</span>
+    </a>
+</SectionContent>
+
+<SectionContent SectionId="NavBarItemsSection">
+    <AuthorizeView>
+        <NotAuthorized>
+            <NavMenuItem HRef="" Match="NavLinkMatch.All">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-house-door-fill me-2" viewBox="0 0 16 16">
+                    <path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5" />
+                </svg>
+                <span>@CommonMessages.HomeMenuItemTitle</span>
+            </NavMenuItem>
+        </NotAuthorized>
+    </AuthorizeView>
+    <AuthorizeView>
+        <Authorized>
+            <NavMenuItem HRef="CreateOrder">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-cart-plus-fill me-2" viewBox="0 0 16 16">
+                    <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0M9 5.5V7h1.5a.5.5 0 0 1 0 1H9v1.5a.5.5 0 0 1-1 0V8H6.5a.5.5 0 0 1 0-1H8V5.5a.5.5 0 0 1 1 0"/>
+                </svg>
+                <span>@CreateOrderMessages.CreateOrderMenuItemTitle</span>
+            </NavMenuItem>
+            <NavMenuItem HRef="invoices">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-receipt me-2" viewBox="0 0 16 16">
+                    <path d="M1.92.556a.5.5 0 0 1 .58.042l1.5 1.5a.5.5 0 0 0 .7.008l1.5-1.5a.5.5 0 0 1 .7 0l1.5 1.5a.5.5 0 0 0 .7-.008l1.5-1.5a.5.5 0 0 1 .7 0l1.5 1.5a.5.5 0 0 0 .7.008l1.5-1.5a.5.5 0 0 1 .8.414v14.99a.5.5 0 0 1-.8.414l-1.5-1.5a.5.5 0 0 0-.7.008l-1.5 1.5a.5.5 0 0 1-.7 0l-1.5-1.5a.5.5 0 0 0-.7-.008l-1.5 1.5a.5.5 0 0 1-.7 0l-1.5-1.5a.5.5 0 0 0-.7.008l-1.5 1.5a.5.5 0 0 1-.58.042A.5.5 0 0 1 1.5 15.5V1a.5.5 0 0 1 .42-.444m1 .927v13.034l.8-.8a1.5 1.5 0 0 1 2.12.02l.8.8.8-.8a1.5 1.5 0 0 1 2.12-.02l.8.8.8-.8a1.5 1.5 0 0 1 2.12.02l.8.8V1.483l-.8.8a1.5 1.5 0 0 1-2.12-.02l-.8-.8-.8.8a1.5 1.5 0 0 1-2.12.02l-.8-.8-.8.8a1.5 1.5 0 0 1-2.12-.02z"/>
+                    <path d="M3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h4a.5.5 0 1 1 0 1h-4a.5.5 0 0 1-.5-.5"/>
+                </svg>
+                <span>Facturas</span>
+            </NavMenuItem>
+        </Authorized>
+    </AuthorizeView>
+</SectionContent>
+
+<SectionContent SectionId="HeaderSection">
+    <LoginDisplayComponent/>
+</SectionContent>
+
+@((RenderFragment)(builder => base.BuildRenderTree(builder)))

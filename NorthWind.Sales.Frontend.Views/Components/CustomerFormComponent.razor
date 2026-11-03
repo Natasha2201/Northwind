@@ -1,0 +1,59 @@
+@using Microsoft.AspNetCore.Components.Forms
+@using NorthWind.Sales.Frontend.Views.ViewModels.Customer
+
+<EditForm Model="Customer" OnValidSubmit="OnSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group mb-3">
+        <label for="identification" class="form-label">Cédula</label>
+        <InputText id="identification" class="form-control" maxlength="10" 
+                   @bind-Value="Customer.Identification" />
+        <ValidationMessage For="() => Customer.Identification" class="text-danger small" />
+    </div>
+
+    <div class="form-group">
+        <label for="firstName">Nombre</label>
+        <InputText id="firstName" class="form-control" 
+                   @bind-Value="Customer.FirstName" />
+        <ValidationMessage For="() => Customer.FirstName" />
+    </div>
+
+    <div class="form-group">
+        <label for="lastName">Apellido</label>
+        <InputText id="lastName" class="form-control" 
+                   @bind-Value="Customer.LastName" />
+        <ValidationMessage For="() => Customer.LastName" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Correo</label>
+        <InputText id="email" class="form-control" 
+                   @bind-Value="Customer.Email" />
+        <ValidationMessage For="() => Customer.Email" />
+    </div>
+
+    <div class="form-group">
+        <label for="phone">Teléfono</label>
+        <InputText id="phone" class="form-control" 
+                   @bind-Value="Customer.Phone" />
+        <ValidationMessage For="() => Customer.Phone" />
+    </div>
+
+    <div class="form-group">
+        <label for="address">Dirección</label>
+        <InputText id="address" class="form-control" 
+                   @bind-Value="Customer.Address" />
+        <ValidationMessage For="() => Customer.Address" />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Guardar</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public CustomerViewModel Customer { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+}

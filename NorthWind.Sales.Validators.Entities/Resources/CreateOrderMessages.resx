@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" msdata:Ordinal="0" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" msdata:Ordinal="0" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ShipCountryRequired" xml:space="preserve">
+    <value>Debe proporcionar el paÃ­s de envÃ­o.</value>
+  </data>
+  <data name="QuantityGreaterThanZero" xml:space="preserve">
+    <value>Debe especificar la cantidad ordenada del producto.</value>
+  </data>
+  <data name="ShipPostalCodeMaximumLength" xml:space="preserve">
+    <value>La longitud mÃ¡xima del cÃ³digo postal es 10.</value>
+  </data>
+  <data name="ShipCityRequired" xml:space="preserve">
+    <value>Debe proporcionar la ciudad de envÃ­o.</value>
+  </data>
+  <data name="ShipCityMaximumLength" xml:space="preserve">
+    <value>La longitud mÃ¡xima de la ciudad es 15.</value>
+  </data>
+  <data name="ShipAddressRequired" xml:space="preserve">
+    <value>Debe proporcionar la direcciÃ³n de envÃ­o.</value>
+  </data>
+  <data name="CustomerIdRequired" xml:space="preserve">
+    <value>Debe proporcionar el identificador del cliente.</value>
+  </data>
+  <data name="UnitPriceGreaterThanZero" xml:space="preserve">
+    <value>Debe especificarse el precio del producto.</value>
+  </data>
+  <data name="CustomerIdRequiredLength" xml:space="preserve">
+    <value>La longitud del identificador debe ser 5.</value>
+  </data>
+  <data name="ShipCountryMinimumLength" xml:space="preserve">
+    <value>Debe especificar al menos 3 caracteres del nombre del PaÃ­s.</value>
+  </data>
+  <data name="ShipCountryMaximumLength" xml:space="preserve">
+    <value>La longitud mÃ¡xima del paÃ­s es 15.</value>
+  </data>
+  <data name="OrderDetailsRequired" xml:space="preserve">
+    <value>Debe especificar los productos de la orden.</value>
+  </data>
+  <data name="ShipCityMinimumLength" xml:space="preserve">
+    <value>Debe especificar al menos 3 caracteres del nombre de la ciudad.</value>
+  </data>
+  <data name="OrderDetailsNotEmpty" xml:space="preserve">
+    <value>Debe especificar al menos un producto de la orden.</value>
+  </data>
+  <data name="ShipAddressMaximumLength" xml:space="preserve">
+    <value>La longitud mÃ¡xima de la direcciÃ³n es 60.</value>
+  </data>
+  <data name="ProductIdGreaterThanZero" xml:space="preserve">
+    <value>Debe especificar el identificador del producto.</value>
+  </data>
+</root>

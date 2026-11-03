@@ -1,0 +1,15 @@
+@page "/user/logout"
+@using NorthWind.Membership.Frontend.RazorViews.Resources
+
+<div class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div class="card shadow p-4 text-center" style="max-width: 400px; border-radius: 12px;">
+        <div class="spinner-border text-primary mx-auto mb-3" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <h5 class="card-title">Cerrando sesión...</h5>
+        <p class="text-muted small">Por favor espere mientras cerramos su sesión de forma segura.</p>
+        <button class="btn btn-outline-primary btn-sm mt-2" @onclick=@(async () => await CloseSession())>
+            @CommonMessages.CloseSessionText
+        </button>
+    </div>
+</div>

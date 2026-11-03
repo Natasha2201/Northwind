@@ -1,0 +1,49 @@
+@using Microsoft.AspNetCore.Components.Forms
+@using NorthWind.RazorComponents.Validators
+@using NorthWind.Membership.Frontend.RazorViews.Resources
+
+<div class="d-flex justify-content-center align-items-center w-100" style="min-height: calc(100vh - 4rem); background-color: #f4f7f6; padding: 2rem 1rem;">
+    <div class="card shadow-lg p-4 p-md-5 border-0" style="max-width: 450px; width: 100%; border-radius: 16px; background-color: #ffffff;">
+
+        <!-- Logo / Encabezado -->
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                 style="width: 64px; height: 64px; background-color: rgba(16,185,129,0.12);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#10b981" viewBox="0 0 16 16">
+                    <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464z"/>
+                </svg>
+            </div>
+            <h2 class="fw-bold mb-1" style="color: #0f172a;">NorthWind Sales</h2>
+            <p class="text-muted mb-0" style="font-size: 0.95rem;">Bienvenido de nuevo</p>
+        </div>
+
+        <EditForm Model="ViewModel" OnValidSubmit="ViewModel.Login">
+            <ModelValidator Validator="ViewModel.Validator" @ref="ViewModel.ModelValidatorComponentReference" />
+
+            <div class="form-floating mb-3">
+                <InputText id="email" class="form-control" placeholder="nombre@gmail.com" @bind-Value="ViewModel.Email"
+                           data-filter="gmail-email" maxlength="254" />
+                <label for="email">@CommonMessages.EmailLabel</label>
+                <ValidationMessage For="() => ViewModel.Email" class="validation-message" />
+            </div>
+
+            <div class="form-floating mb-3 position-relative">
+                <InputText id="password" type="@(ShowPassword ? "text" : "password")" class="form-control pe-5" placeholder="Contraseña" @bind-Value="ViewModel.Password" />
+                <label for="password">@CommonMessages.PasswordLabel</label>
+                <button type="button" class="btn btn-link text-secondary position-absolute top-50 end-0 translate-middle-y text-decoration-none" style="z-index: 5;" aria-label="@(ShowPassword ? "Ocultar contraseña" : "Mostrar contraseña")" @onclick="TogglePasswordVisibility">
+                    <i class="bi @(ShowPassword ? "bi-eye-slash" : "bi-eye")" aria-hidden="true"></i>
+                </button>
+                <ValidationMessage For="() => ViewModel.Password" class="validation-message" />
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 py-2 fs-6 fw-bold rounded-3 mt-2">
+                @CommonMessages.LoginText
+            </button>
+        </EditForm>
+
+        <div class="text-center mt-4 pt-3 border-top" style="font-size: 0.9rem; color: #64748b;">
+            ¿No tienes cuenta?
+            <a href="user/register" class="fw-semibold ms-1" style="color: #10b981;">@CommonMessages.CreateAccountText</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavigationManager
+
+<PageTitle>NorthWind Sales - Inicio</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        @* Usuario autenticado: redirigir a Crear Orden *@
+    </Authorized>
+    <NotAuthorized>
+        <div class="hero-wrapper">
+            <div class="hero-section">
+                <div class="hero-content text-center">
+                    <h1 class="hero-title">
+                        Bienvenido a <br />
+                        <span class="hero-brand">NorthWind Sales</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Sistema integral de punto de venta, inventario y facturación electrónica.
+                        Gestiona tus órdenes, controla tu stock y genera facturas de manera rápida y segura.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="user/login" class="btn-hero-primary">
+                            Empezar a Vender
+                        </a>
+                        <a href="user/register" class="btn-hero-secondary">
+                            Crear Cuenta
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            NavigationManager.NavigateTo("/CreateOrder");
+        }
+    }
+}

@@ -1,0 +1,9 @@
+﻿global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Linq.Expressions;
+global using System.Threading.Tasks;
+global using FluentValidation;
+global using NorthWind.Validation.Entities.Abstractions;
+global using NorthWind.Validation.Entities.Interfaces;
+global using NorthWind.Validation.Entities.ValueObjects;

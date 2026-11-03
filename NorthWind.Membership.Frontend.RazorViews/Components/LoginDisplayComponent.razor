@@ -1,0 +1,80 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@using NorthWind.Membership.Frontend.RazorViews.Resources
+@using NorthWind.Membership.Frontend.RazorViews.AuthenticationStateProviders
+@inject NavigationManager NavigationManager
+@inject JWTAuthenticationStateProvider AuthStateProvider
+
+<AuthorizeView>
+    <Authorized>
+        <div class="d-flex align-items-center gap-3">
+            <span class="text-muted d-flex align-items-center small">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-circle me-2 text-secondary" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/>
+                </svg>
+                Bienvenido,&nbsp;<strong class="text-dark fw-bold">@GetUserName(context)</strong>
+            </span>
+            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1" @onclick="ShowLogoutConfirmation">
+                @CommonMessages.CloseSessionText
+            </button>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="d-flex align-items-center gap-2">
+            <a href="user/login" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                @CommonMessages.LoginText
+            </a>
+            <a href="user/register" class="btn btn-success btn-sm rounded-pill px-3">
+                @CommonMessages.CreateAccountText
+            </a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@if (showConfirmation)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(15, 23, 42, 0.6);">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark">Cerrar Sesión</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="CancelLogout"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p class="text-muted mb-0">¿Está seguro de que desea cerrar la sesión actual?</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-3" @onclick="CancelLogout">Cancelar</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4" @onclick="ConfirmLogout">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code{
+    private bool showConfirmation = false;
+
+    private void ShowLogoutConfirmation()
+    {
+        showConfirmation = true;
+    }
+
+    private void CancelLogout()
+    {
+        showConfirmation = false;
+    }
+
+    private async Task ConfirmLogout()
+    {
+        showConfirmation = false;
+        await AuthStateProvider.LogoutAsync();
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+
+    string GetUserName(AuthenticationState context) =>
+        context.User.Claims
+            .Where(c => c.Type == "FullName")
+            .Select(c => c.Value)
+            .FirstOrDefault() ?? context.User.Identity.Name;
+}

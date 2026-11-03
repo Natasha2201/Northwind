@@ -1,0 +1,9 @@
+﻿global using System;
+global using System.Net.Http;
+global using System.Net.Http.Json;
+global using System.Threading.Tasks;
+global using Microsoft.Extensions.DependencyInjection;
+global using NorthWind.HttpDelegatingHandlers;
+global using NorthWind.Sales.Entities.Dtos.CreateOrder;
+global using NorthWind.Sales.Entities.ValueObjects;
+global using NorthWind.Sales.Frontend.BusinessObjects.Interfaces;

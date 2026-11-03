@@ -1,0 +1,32 @@
+.nav-item {
+    font-size: 0.95rem;
+    padding: 0.2rem 0.5rem;
+}
+
+    .nav-item ::deep a {
+        color: #94a3b8;
+        border-radius: 10px;
+        height: 2.8rem;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease-in-out;
+        gap: 0.5rem;
+    }
+
+    /* Elemento activo: gradiente verde */
+    .nav-item ::deep a.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Hover suave verde */
+    .nav-item ::deep a:hover:not(.active) {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #d1fae5;
+        transform: translateX(3px);
+    }

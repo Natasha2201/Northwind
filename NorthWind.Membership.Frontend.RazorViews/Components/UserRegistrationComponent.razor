@@ -1,0 +1,85 @@
+@using Microsoft.AspNetCore.Components.Forms
+@using NorthWind.RazorComponents.Validators
+@using NorthWind.Membership.Frontend.RazorViews.Resources
+
+<div class="d-flex justify-content-center align-items-center w-100" style="min-height: calc(100vh - 4rem); background-color: #f4f7f6; padding: 2rem 1rem;">
+    <div class="card shadow-lg p-4 p-md-5 border-0" style="max-width: 520px; width: 100%; border-radius: 16px; background-color: #ffffff;">
+
+        <!-- Logo / Encabezado -->
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                 style="width: 64px; height: 64px; background-color: rgba(16,185,129,0.12);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#10b981" viewBox="0 0 16 16">
+                    <path d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                    <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5"/>
+                </svg>
+            </div>
+            <h2 class="fw-bold mb-1" style="color: #0f172a;">Crear Cuenta</h2>
+            <p class="text-muted mb-0" style="font-size: 0.95rem;">Únete a NorthWind Sales</p>
+        </div>
+
+        <EditForm Model="ViewModel" OnValidSubmit="ViewModel.Register">
+            <ModelValidator Validator="ViewModel.Validator" @ref="ViewModel.ModelValidatorComponentReference" />
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="firstName" class="form-control" placeholder="Nombre" @bind-Value="ViewModel.FirstName"
+                                   data-filter="letters" maxlength="50" />
+                        <label for="firstName">@UserRegistrationMessages.FirstNameLabel</label>
+                        <ValidationMessage For="() => ViewModel.FirstName" class="validation-message" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <InputText id="lastName" class="form-control" placeholder="Apellido" @bind-Value="ViewModel.LastName"
+                                   data-filter="letters" maxlength="50" />
+                        <label for="lastName">@UserRegistrationMessages.LastNameLabel</label>
+                        <ValidationMessage For="() => ViewModel.LastName" class="validation-message" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText id="email" class="form-control" placeholder="nombre@gmail.com" @bind-Value="ViewModel.Email"
+                           data-filter="gmail-email" maxlength="254" />
+                <label for="email">@CommonMessages.EmailLabel</label>
+                <ValidationMessage For="() => ViewModel.Email" class="validation-message" />
+            </div>
+
+            <div class="form-floating mb-3 position-relative">
+                <InputText id="password" type="@(ShowPassword ? "text" : "password")" class="form-control pe-5" placeholder="Contraseña" @bind-Value="ViewModel.Password" />
+                <label for="password">@CommonMessages.PasswordLabel</label>
+                <button type="button" class="btn btn-link text-secondary position-absolute top-50 end-0 translate-middle-y text-decoration-none" style="z-index: 5;" aria-label="@(ShowPassword ? "Ocultar contraseña" : "Mostrar contraseña")" @onclick="TogglePasswordVisibility">
+                    <i class="bi @(ShowPassword ? "bi-eye-slash" : "bi-eye")" aria-hidden="true"></i>
+                </button>
+                <ValidationMessage For="() => ViewModel.Password" class="validation-message" />
+            </div>
+
+            <div class="form-floating mb-3 position-relative">
+                <InputText id="confirmPassword" type="@(ShowPasswordConfirmation ? "text" : "password")" class="form-control pe-5" placeholder="Confirmar Contraseña" @bind-Value="ViewModel.PasswordConfirmation" />
+                <label for="confirmPassword">@UserRegistrationMessages.PasswordConfirmationLabel</label>
+                <button type="button" class="btn btn-link text-secondary position-absolute top-50 end-0 translate-middle-y text-decoration-none" style="z-index: 5;" aria-label="@(ShowPasswordConfirmation ? "Ocultar confirmación" : "Mostrar confirmación")" @onclick="TogglePasswordConfirmationVisibility">
+                    <i class="bi @(ShowPasswordConfirmation ? "bi-eye-slash" : "bi-eye")" aria-hidden="true"></i>
+                </button>
+                <ValidationMessage For="() => ViewModel.PasswordConfirmation" class="validation-message" />
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 py-2 fs-6 fw-bold rounded-3 mt-2">
+                @UserRegistrationMessages.RegisterButtonText
+            </button>
+        </EditForm>
+
+        @if (!string.IsNullOrWhiteSpace(ViewModel.InformationMessage))
+        {
+            <div class="alert alert-success mt-3 text-center border-0 rounded-3 small">
+                ✓ @ViewModel.InformationMessage
+            </div>
+        }
+
+        <div class="text-center mt-4 pt-3 border-top" style="font-size: 0.9rem; color: #64748b;">
+            ¿Ya tienes cuenta?
+            <a href="user/login" class="fw-semibold ms-1" style="color: #10b981;">@CommonMessages.LoginText</a>
+        </div>
+    </div>
+</div>

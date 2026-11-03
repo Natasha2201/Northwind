@@ -1,0 +1,298 @@
+@page "/invoices"
+@attribute [Authorize]
+@implements IDisposable
+@using NorthWind.Sales.Frontend.BusinessObjects.Interfaces
+@using NorthWind.Sales.Frontend.BusinessObjects.ValueObjects
+@using System.Globalization
+@inject IInvoiceGateway InvoiceGateway
+@inject NavigationManager NavigationManager
+
+<PageTitle>Buscar Facturas</PageTitle>
+
+<div class="p-4">
+    <!-- Tarjeta: Búsqueda -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-body p-4">
+            <h4 class="fw-bold mb-3" style="color: #0f172a;">Historial de Facturas</h4>
+            <div class="input-group">
+                <select class="form-select" style="max-width: 150px;" value="@SearchCriteria" @onchange="OnCriteriaChanged">
+                    <option value="Todos">Todos</option>
+                    <option value="Factura">Factura #</option>
+                    <option value="Nombre">Nombre</option>
+                    <option value="Apellido">Apellido</option>
+                </select>
+                <input type="text" class="form-control form-control-lg"
+                       placeholder="@GetPlaceholder()"
+                       maxlength="25"
+                       value="@SearchTerm"
+                       @oninput="OnInput"
+                       @onkeypress="OnKeyPress" />
+                <button class="btn btn-success px-4 fw-semibold" @onclick="ExecuteSearchImmediate">Buscar</button>
+            </div>
+            <div class="row g-2 mt-2">
+                <div class="col-sm-6 col-lg-3">
+                    <label for="invoice-date-from" class="form-label text-muted small mb-1">Fecha desde</label>
+                    <input id="invoice-date-from" type="date" class="form-control"
+                           value="@FormatDateFilter(DateFrom)"
+                           @onchange="e => OnDateFilterChanged(e, true)" />
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <label for="invoice-date-to" class="form-label text-muted small mb-1">Fecha hasta</label>
+                    <input id="invoice-date-to" type="date" class="form-control"
+                           value="@FormatDateFilter(DateTo)"
+                           @onchange="e => OnDateFilterChanged(e, false)" />
+                </div>
+                @if (DateRangeIsInvalid)
+                {
+                    <div class="col-12"><small class="text-danger">La fecha inicial no puede ser posterior a la fecha final.</small></div>
+                }
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-3" role="group" aria-label="Filtros rápidos por fecha">
+                <button type="button" class="btn btn-outline-success btn-sm" @onclick="() => ApplyDatePreset(0)">Hoy</button>
+                <button type="button" class="btn btn-outline-success btn-sm" @onclick="() => ApplyDatePreset(1)">Esta semana</button>
+                <button type="button" class="btn btn-outline-success btn-sm" @onclick="() => ApplyDatePreset(2)">Este mes</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm ms-sm-auto" @onclick="ClearFilters">Limpiar filtros</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjeta: Resultados -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="text-muted mt-2">Buscando facturas...</p>
+                </div>
+            }
+            else if (Results.Items.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                                <th class="ps-4 text-muted small fw-semibold">Factura #</th>
+                                <th class="text-muted small fw-semibold">Fecha</th>
+                                <th class="text-muted small fw-semibold">Nombre</th>
+                                <th class="text-muted small fw-semibold">Apellido</th>
+                                <th class="text-muted small fw-semibold">Total</th>
+                                <th class="text-end pe-4 text-muted small fw-semibold">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var invoice in Results.Items)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-semibold" style="color: #10b981;">@invoice.InvoiceNumber</td>
+                                    <td>@invoice.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@(string.IsNullOrWhiteSpace(invoice.CustomerFirstName) ? invoice.CustomerId : invoice.CustomerFirstName)</td>
+                                    <td>@invoice.CustomerLastName</td>
+                                    <td class="fw-bold">@invoice.Total.ToString("C")</td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-success rounded-pill px-3"
+                                                @onclick="() => ViewInvoice(invoice.Id)">
+                                            Ver Factura
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-3 border-top">
+                    <Pagination Page="Results.Page"
+                                TotalPages="Results.TotalPages"
+                                OnPageChanged="LoadPage" />
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <p class="text-muted mb-0">No se encontraron facturas.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string SearchCriteria = "Todos";
+    private string SearchTerm = string.Empty;
+    private DateTime? DateFrom;
+    private DateTime? DateTo;
+    private bool DateRangeIsInvalid => DateFrom.HasValue && DateTo.HasValue && DateFrom.Value.Date > DateTo.Value.Date;
+    private PagedResult<InvoiceSearchDto> Results = new([], 0, 1, 10);
+    private bool IsLoading = false;
+    private int _searchVersion;
+    private CancellationTokenSource? _debounceCts;
+
+    private string GetPlaceholder() => SearchCriteria switch
+    {
+        "Factura" => "Ej: FAC-00000027 o solo 27...",
+        "Nombre" => "Nombre del cliente...",
+        "Apellido" => "Apellido del cliente...",
+        _ => "Buscar por factura, nombre o apellido..."
+    };
+
+    private string GetInputFilter() => SearchCriteria switch
+    {
+        "Factura" => "alphanumeric-hyphen",
+        "Nombre" or "Apellido" => "letters",
+        _ => "alphanumeric"
+    };
+
+    private static string FormatDateFilter(DateTime? date) =>
+        date?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty;
+
+    private async Task OnDateFilterChanged(ChangeEventArgs e, bool isStartDate)
+    {
+        var value = e.Value?.ToString();
+        DateTime? parsedDate = DateTime.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out var parsed)
+            ? parsed.Date
+            : null;
+
+        if (isStartDate)
+            DateFrom = parsedDate;
+        else
+            DateTo = parsedDate;
+
+        CancelDebounce();
+        await Search();
+    }
+
+    private async Task ApplyDatePreset(int preset)
+    {
+        var today = DateTime.Today;
+        switch (preset)
+        {
+            case 0:
+                DateFrom = today;
+                DateTo = today;
+                break;
+            case 1:
+                var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
+                DateFrom = today.AddDays(-daysSinceMonday);
+                DateTo = DateFrom.Value.AddDays(6);
+                break;
+            case 2:
+                DateFrom = new DateTime(today.Year, today.Month, 1);
+                DateTo = DateFrom.Value.AddMonths(1).AddDays(-1);
+                break;
+        }
+
+        CancelDebounce();
+        await Search();
+    }
+
+    private async Task ClearFilters()
+    {
+        CancelDebounce();
+        SearchCriteria = "Todos";
+        SearchTerm = string.Empty;
+        DateFrom = null;
+        DateTo = null;
+        await Search();
+    }
+
+    private void CancelDebounce()
+    {
+        _debounceCts?.Cancel();
+        _debounceCts?.Dispose();
+        _debounceCts = null;
+    }
+
+    private async Task OnCriteriaChanged(ChangeEventArgs e)
+    {
+        SearchCriteria = e.Value?.ToString() ?? "Todos";
+        SearchTerm = string.Empty;
+        CancelDebounce();
+        await Search();
+    }
+
+    private async Task OnInput(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value?.ToString() ?? string.Empty;
+        CancelDebounce();
+        var debounce = _debounceCts = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, debounce.Token);
+            if (!debounce.IsCancellationRequested)
+                await Search();
+        }
+        catch (TaskCanceledException)
+        {
+            // A newer keystroke or criterion change superseded this search.
+        }
+    }
+
+    private async Task OnKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await ExecuteSearchImmediate();
+    }
+
+    private async Task ExecuteSearchImmediate()
+    {
+        CancelDebounce();
+        await Search();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Search();
+    }
+
+    private async Task Search()
+    {
+        var version = ++_searchVersion;
+        IsLoading = true;
+        StateHasChanged();
+        if (DateRangeIsInvalid)
+        {
+            Results = new PagedResult<InvoiceSearchDto>([], 0, 1, 10);
+            IsLoading = false;
+            StateHasChanged();
+            return;
+        }
+
+        var results = await InvoiceGateway.SearchInvoicesAsync(SearchTerm, SearchCriteria, 1, 10, DateFrom, DateTo);
+        if (version != _searchVersion) return;
+        Results = results;
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadPage(int page)
+    {
+        var version = ++_searchVersion;
+        IsLoading = true;
+        StateHasChanged();
+        if (DateRangeIsInvalid)
+        {
+            Results = new PagedResult<InvoiceSearchDto>([], 0, page, 10);
+            IsLoading = false;
+            StateHasChanged();
+            return;
+        }
+
+        var results = await InvoiceGateway.SearchInvoicesAsync(SearchTerm, SearchCriteria, page, 10, DateFrom, DateTo);
+        if (version != _searchVersion) return;
+        Results = results;
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private void ViewInvoice(int id)
+    {
+        NavigationManager.NavigateTo($"/invoice/{id}");
+    }
+
+    public void Dispose() => CancelDebounce();
+}
