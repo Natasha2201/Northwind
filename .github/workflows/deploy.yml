@@ -1,8 +1,8 @@
-name: Deploy to Debian Server
+name: Deploy Northwind to Debian
 
 on:
   push:
-    branches: [ "main" ] # Se ejecuta cuando subes cambios a la rama main
+    branches: [ "main" ] # O "master", dependiendo de cómo se llame tu rama principal
 
 jobs:
   build-and-deploy:
@@ -12,11 +12,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # 1. Configurar .NET (Ajusta la versión si usas otra, ej. 6.0 o 7.0)
+    # 1. Configurar .NET 10
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x' 
+        dotnet-version: '10.0.x' 
+        # Si es una versión 'preview', puede que necesites añadir:
+        # dotnet-quality: 'preview'
 
     # 2. Compilar el proyecto
     - name: Restore dependencies
@@ -37,9 +39,9 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         source: "./publish/*"
-        target: "/var/www/northwind" # <--- CAMBIA ESTO por la ruta real en tu Debian
+        target: "/var/www/northwind" # <--- ⚠️ CAMBIA ESTO por la ruta real en tu Debian
 
-    # 4. (Opcional) Reiniciar el servicio en el servidor
+    # 4. Reiniciar el servicio en el servidor (Opcional)
     - name: Restart Service
       uses: appleboy/ssh-action@master
       with:
