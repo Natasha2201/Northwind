@@ -1,8 +1,8 @@
-name: Deploy Northwind to Debian
+name: Deploy Northwind & Blazor to Debian
 
 on:
   push:
-    branches: [ "main" ] # O "master", dependiendo de cómo se llame tu rama principal
+    branches: [ "main" ] # O "master", revisa el nombre de tu rama principal
 
 jobs:
   build-and-deploy:
@@ -17,32 +17,40 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x' 
-        # Si es una versión 'preview', puede que necesites añadir:
-        # dotnet-quality: 'preview'
 
-    # 2. Compilar el proyecto
-    - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --no-restore -c Release
-      
-    - name: Publish
-      run: dotnet publish -c Release -o ./publish
+    # 2. Compilar y Publicar el proyecto WebApi (Backend)
+    - name: Publish WebApi
+      # ⚠️ Asegúrate de que la ruta coincida exactamente con tu explorador de soluciones
+      run: dotnet publish "./UI/NorthWind.Sales.WebApi/NorthWind.Sales.WebApi.csproj" -c Release -o ./PublishNorthWind
 
-    # 3. Copiar archivos al servidor vía SCP
-    - name: Copy files to server
+    # 3. Compilar y Publicar el proyecto BlazorClient (Frontend)
+    - name: Publish BlazorClient
+      run: dotnet publish "./UI/NorthWind.Sales.BlazorClient/NorthWind.Sales.BlazorClient.csproj" -c Release -o ./PublishBlazor
+
+    # 4. Copiar archivos de WebApi al servidor
+    - name: Copy WebApi files
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
-        source: "./publish/*"
-        target: "/var/www/northwind" # <--- ⚠️ CAMBIA ESTO por la ruta real en tu Debian
+        source: "./PublishNorthWind/*"
+        target: "/var/www/northwind" # Revisa si en tu servidor es con 'W' mayúscula
 
-    # 4. Reiniciar el servicio en el servidor (Opcional)
-    - name: Restart Service
+    # 5. Copiar archivos de Blazor (solo la carpeta wwwroot) al servidor
+    - name: Copy Blazor files
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        source: "./PublishBlazor/wwwroot/*"
+        target: "/var/www/blazor/wwwroot"
+
+    # 6. Ejecutar comandos en el servidor (Permisos y Reinicio)
+    - name: Execute Server Commands
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST }}
@@ -50,6 +58,14 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          # Aquí pones el comando para reiniciar tu app
-          # Ejemplo: sudo systemctl restart northwind.service
-          echo "Despliegue completado"
+          # Permisos para WebApi
+          sudo chown -R natasha:natasha /var/www/NorthWind/wwwroot
+          
+          # Permisos para Blazor
+          sudo chown -R www-data:www-data /var/www/blazor/wwwroot
+          
+          # Reiniciar el servicio de .NET y recargar Nginx
+          sudo systemctl restart northwind.service
+          sudo systemctl reload nginx
+          
+          echo "¡Despliegue de WebApi y Blazor completado!"
