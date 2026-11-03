@@ -2,7 +2,7 @@ name: Deploy Northwind & Blazor to Debian
 
 on:
   push:
-    branches: [ "main", "master" ] # Se ejecutará si haces push a main o master
+    branches: [ "main", "master" ]
 
 jobs:
   build-and-deploy:
@@ -12,24 +12,31 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # 1. Conectar a la red de Tailscale
+    - name: Tailscale
+      uses: tailscale/github-action@v2
+      with:
+        authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+    # 2. Configurar .NET 10
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x' 
 
-    # 1. Compilar la solución (.slnx)
+    # 3. Compilar la solución (usando .slnx)
     - name: Build Solution
       run: dotnet build "Northwind.slnx" -c Release
 
-    # 2. Publicar WebApi (ruta directa en la raíz)
+    # 4. Publicar WebApi
     - name: Publish WebApi
       run: dotnet publish "NorthWind.Sales.WebApi/NorthWind.Sales.WebApi.csproj" -c Release -o ./PublishNorthWind
 
-    # 3. Publicar BlazorClient (ruta directa en la raíz)
+    # 5. Publicar BlazorClient
     - name: Publish BlazorClient
       run: dotnet publish "NorthWind.Sales.BlazorClient/NorthWind.Sales.BlazorClient.csproj" -c Release -o ./PublishBlazor
 
-    # 4. Copiar archivos de WebApi al servidor
+    # 6. Copiar archivos de WebApi al servidor
     - name: Copy WebApi files
       uses: appleboy/scp-action@master
       with:
@@ -40,7 +47,7 @@ jobs:
         source: "./PublishNorthWind/*"
         target: "/var/www/northwind" 
 
-    # 5. Copiar archivos de Blazor (solo la carpeta wwwroot) al servidor
+    # 7. Copiar archivos de Blazor (solo la carpeta wwwroot)
     - name: Copy Blazor files
       uses: appleboy/scp-action@master
       with:
@@ -51,7 +58,7 @@ jobs:
         source: "./PublishBlazor/wwwroot/*"
         target: "/var/www/blazor/wwwroot"
 
-    # 6. Ejecutar comandos en el servidor
+    # 8. Ejecutar comandos finales en el servidor
     - name: Execute Server Commands
       uses: appleboy/ssh-action@master
       with:
@@ -60,14 +67,8 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          # Permisos para WebApi (Ojo con la W mayúscula de NorthWind en tu Debian)
           sudo chown -R natasha:natasha /var/www/NorthWind/wwwroot
-          
-          # Permisos para Blazor
           sudo chown -R www-data:www-data /var/www/blazor/wwwroot
-          
-          # Reiniciar servicios
           sudo systemctl restart northwind.service
           sudo systemctl reload nginx
-          
-          echo "¡Despliegue de WebApi y Blazor completado!"
+          echo "¡Despliegue completado con éxito!"
