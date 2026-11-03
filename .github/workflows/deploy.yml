@@ -2,8 +2,8 @@ name: Deploy Northwind & Blazor to Debian
 
 on:
   push:
-    branches: [ "main" ] # O "master", revisa el nombre de tu rama principal
-
+    branches: [ "master" ] # O "master", revisa el nombre de tu rama principal
+    
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
