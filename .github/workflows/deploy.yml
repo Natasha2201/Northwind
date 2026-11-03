@@ -18,15 +18,19 @@ jobs:
       with:
         dotnet-version: '10.0.x' 
 
-    # 2. Compilar WebApi (Buscando el .csproj en cualquier carpeta)
+    # 2. Compilar TODA la solución (esto arregla el error de "Project file does not exist")
+    - name: Build Solution
+      run: dotnet build Northwind.sln -c Release
+
+    # 3. Publicar WebApi usando el nombre del proyecto directamente
     - name: Publish WebApi
-      run: dotnet publish "**/NorthWind.Sales.WebApi.csproj" -c Release -o ./PublishNorthWind
+      run: dotnet publish UI/NorthWind.Sales.WebApi/NorthWind.Sales.WebApi.csproj -c Release -o ./PublishNorthWind
 
-    # 3. Compilar Blazor (Buscando el .csproj en cualquier carpeta)
+    # 4. Publicar BlazorClient
     - name: Publish BlazorClient
-      run: dotnet publish "**/NorthWind.Sales.BlazorClient.csproj" -c Release -o ./PublishBlazor
+      run: dotnet publish UI/Uls/NorthWind.Sales.BlazorClient/NorthWind.Sales.BlazorClient.csproj -c Release -o ./PublishBlazor
 
-    # 4. Copiar archivos de WebApi al servidor
+    # 5. Copiar archivos de WebApi al servidor
     - name: Copy WebApi files
       uses: appleboy/scp-action@master
       with:
@@ -37,7 +41,7 @@ jobs:
         source: "./PublishNorthWind/*"
         target: "/var/www/northwind" 
 
-    # 5. Copiar archivos de Blazor (solo la carpeta wwwroot) al servidor
+    # 6. Copiar archivos de Blazor (solo la carpeta wwwroot) al servidor
     - name: Copy Blazor files
       uses: appleboy/scp-action@master
       with:
@@ -48,7 +52,7 @@ jobs:
         source: "./PublishBlazor/wwwroot/*"
         target: "/var/www/blazor/wwwroot"
 
-    # 6. Ejecutar comandos en el servidor
+    # 7. Ejecutar comandos en el servidor
     - name: Execute Server Commands
       uses: appleboy/ssh-action@master
       with:
@@ -57,7 +61,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.PORT }}
         script: |
-          # Permisos para WebApi (Ojo con la 'W' mayúscula de NorthWind en tu Debian)
+          # Permisos para WebApi
           sudo chown -R natasha:natasha /var/www/NorthWind/wwwroot
           
           # Permisos para Blazor
