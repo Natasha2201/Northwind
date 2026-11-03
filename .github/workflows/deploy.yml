@@ -1,0 +1,53 @@
+name: Deploy to Debian Server
+
+on:
+  push:
+    branches: [ "main" ] # Se ejecuta cuando subes cambios a la rama main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 1. Configurar .NET (Ajusta la versión si usas otra, ej. 6.0 o 7.0)
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x' 
+
+    # 2. Compilar el proyecto
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore -c Release
+      
+    - name: Publish
+      run: dotnet publish -c Release -o ./publish
+
+    # 3. Copiar archivos al servidor vía SCP
+    - name: Copy files to server
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        source: "./publish/*"
+        target: "/var/www/northwind" # <--- CAMBIA ESTO por la ruta real en tu Debian
+
+    # 4. (Opcional) Reiniciar el servicio en el servidor
+    - name: Restart Service
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          # Aquí pones el comando para reiniciar tu app
+          # Ejemplo: sudo systemctl restart northwind.service
+          echo "Despliegue completado"
