@@ -87,7 +87,7 @@ internal class QueriesRepository(INorthWindSalesQueriesDataContext context) : IQ
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(c => new CustomerSearchDto(
-                c.Id, c.Identification, c.FirstName, c.LastName, c.Email, c.Address));
+                c.Id, c.Identification, c.FirstName, c.LastName, c.Email, c.Address, c.CurrentBalance));
 
         var result = await context.ToListAsync(items);
 
@@ -145,7 +145,7 @@ internal class QueriesRepository(INorthWindSalesQueriesDataContext context) : IQ
         var totalCount = await context.CountAsync(queryable);
 
         var items = queryable
-            .OrderBy(p => p.Name)
+            .OrderBy(p => p.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(p => new ProductSearchDto(

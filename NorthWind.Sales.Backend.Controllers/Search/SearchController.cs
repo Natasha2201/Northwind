@@ -17,6 +17,15 @@ public static class SearchController
         })
         .RequireAuthorization();
 
+        app.MapGet("/api/customers/{id}/balance", async (
+            string id,
+            IQueriesRepository repository) =>
+        {
+            var balance = await repository.GetCustomerCurrentBalance(id);
+            return Results.Ok(new { balance = balance ?? 0, pendingDebt = balance ?? 0, currentBalance = balance ?? 0 });
+        })
+        .RequireAuthorization();
+
         app.MapGet("/api/products/search", async (
             string? q,
             string? criteria,
