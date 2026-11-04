@@ -6,7 +6,8 @@ public class CustomerSearchDto(
     string firstName,
     string lastName,
     string email,
-    string address)
+    string address,
+    decimal currentBalance = 0)
 {
     public string Id => id;
     public string Identification => identification;
@@ -15,4 +16,6 @@ public class CustomerSearchDto(
     public string Email => email;
     public string Address => address;
     public string FullName => $"{firstName} {lastName}";
+    public decimal CurrentBalance => currentBalance;
+    public decimal PendingDebt => currentBalance;
 }
