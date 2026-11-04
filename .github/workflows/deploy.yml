@@ -34,7 +34,7 @@ jobs:
       with:
         node-version: '20'
 
-    # 5. Instalar dependencias y compilar React
+    # 5. Instalar dependencias y compilar React (esto genera la carpeta dist)
     - name: Build React Frontend
       working-directory: ./NorthWind.Sales.ReactClient
       run: |
@@ -63,7 +63,7 @@ jobs:
         source: "./NorthWind.Sales.ReactClient/dist/*"
         target: "/tmp/deploy_react"
 
-    # 8. Mover archivos a su destino final, asignar permisos y reiniciar
+    # 8. Mover archivos a destino final, asignar permisos y reiniciar
     - name: Execute Server Commands
       uses: appleboy/ssh-action@master
       with:
@@ -78,7 +78,7 @@ jobs:
           sudo chown -R natasha:natasha /var/www/NorthWind/wwwroot
           
           # --- PROCESO PARA REACT ---
-          sudo mkdir -p /var/www/blazor/wwwroot 
+          sudo mkdir -p /var/www/blazor/wwwroot
           sudo rm -rf /var/www/blazor/wwwroot/*
           sudo cp -r /tmp/deploy_react/* /var/www/blazor/wwwroot/
           sudo chown -R www-data:www-data /var/www/blazor/wwwroot
